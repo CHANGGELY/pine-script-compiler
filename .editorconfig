@@ -1,0 +1,13 @@
+# EditorConfig 用于统一不同编辑器/IDE 的基础格式规则
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
