@@ -20,26 +20,7 @@
     "prettier"
   ],
   "rules": {
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
-      }
-    ],
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-var-requires": "off",
-    "no-useless-escape": "off",
-    "no-empty": "off",
-    "no-constant-condition": "off",
-    "security/detect-object-injection": "off",
-    "security/detect-non-literal-fs-filename": "off",
-    "security/detect-non-literal-regexp": "off",
-    "security/detect-non-literal-require": "off"
-  },
-  "ignorePatterns": [
-    "dist",
-    "node_modules"
-  ]
+    "@typescript-eslint/ban-types": "off",
+    "prefer-const": "off"
+  }
 }
