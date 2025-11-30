@@ -24,7 +24,7 @@ jobs:
       - name: Security audit
         run: npm audit --audit-level=moderate || true
       - name: Lint
-        run: eslint . --ext .ts
+        run: npx eslint . --ext .ts
         continue-on-error: true
       - name: Type check
         run: npm run type-check
