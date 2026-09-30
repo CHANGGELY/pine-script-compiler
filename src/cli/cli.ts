@@ -4,6 +4,7 @@ import { CompilerOptions } from '../types';
 import chalk from 'chalk';
 import * as fs from 'fs';
 import * as glob from 'glob';
+import { resolveSafePath, isInsideWorkingDir } from '../utils/path-guard';
 
 /**
  * Pine Script Compiler CLI
@@ -116,7 +117,7 @@ export class CLI {
             allowExperimentalFeatures: false
           }
         };
-        fs.writeFileSync(opts.output, JSON.stringify(config, null, 2));
+        fs.writeFileSync(resolveSafePath(opts.output), JSON.stringify(config, null, 2));
         console.log(chalk.blue(`Config written to ${opts.output}`));
       });
   }
@@ -136,7 +137,7 @@ export class CLI {
     let compilerOptions: Partial<CompilerOptions> = {};
     if (options.config) {
       try {
-        const raw = JSON.parse(fs.readFileSync(options.config, 'utf8'));
+        const raw = JSON.parse(fs.readFileSync(resolveSafePath(options.config), 'utf8'));
         const { parseCompilerConfig } = require('./config');
         compilerOptions = { ...parseCompilerConfig(raw) };
       } catch (e) {
@@ -162,7 +163,7 @@ export class CLI {
     for (const file of files) {
       try {
         if (options.syntaxOnly) {
-          const source = fs.readFileSync(file, 'utf8');
+          const source = fs.readFileSync(resolveSafePath(file), 'utf8');
           const syntaxResult = this.compiler.validateSyntax(source);
           
           if (!syntaxResult.valid) {
@@ -204,7 +205,7 @@ export class CLI {
     const output = results.join('\n');
     
     if (options.output) {
-      fs.writeFileSync(options.output, output);
+      fs.writeFileSync(resolveSafePath(options.output), output);
       console.log(chalk.blue(`Results written to ${options.output}`));
     } else {
       console.log(output);
@@ -240,7 +241,7 @@ export class CLI {
     let loadedFormat: string | undefined;
     if (options.config) {
       try {
-        const raw = JSON.parse(fs.readFileSync(options.config, 'utf8'));
+        const raw = JSON.parse(fs.readFileSync(resolveSafePath(options.config), 'utf8'));
         const { parseCompilerConfig } = require('./config');
         const cfg = parseCompilerConfig(raw);
         if (cfg.outputFormat) loadedFormat = cfg.outputFormat;
@@ -251,7 +252,7 @@ export class CLI {
     
     for (const file of files) {
       try {
-        const source = fs.readFileSync(file, 'utf8');
+        const source = fs.readFileSync(resolveSafePath(file), 'utf8');
         const result = this.compiler.validateSyntax(source);
         
         if (result.valid) {
@@ -324,19 +325,21 @@ export class CLI {
     
     for (const pattern of patterns) {
       try {
-        if (fs.existsSync(pattern) && fs.statSync(pattern).isFile()) {
+        const safePattern = resolveSafePath(pattern);
+        if (fs.existsSync(safePattern) && fs.statSync(safePattern).isFile()) {
           // Direct file path
-          files.push(pattern);
+          files.push(safePattern);
         } else {
           // Glob pattern
-          const matches = glob.sync(pattern, { 
+          const matches = glob.sync(pattern, {
             ignore: ['node_modules/**', '.git/**'],
             absolute: true
           });
-          files.push(...matches.filter(file => 
-            file.endsWith('.pine') || 
-            file.endsWith('.pinescript') ||
-            file.endsWith('.psc')
+          files.push(...matches.filter(file =>
+            (file.endsWith('.pine') ||
+              file.endsWith('.pinescript') ||
+              file.endsWith('.psc')) &&
+            isInsideWorkingDir(file)
           ));
         }
       } catch (error) {
@@ -364,7 +367,7 @@ export class CLI {
       
       try {
         if (options.syntaxOnly) {
-          const source = fs.readFileSync(filePath, 'utf8');
+          const source = fs.readFileSync(resolveSafePath(filePath), 'utf8');
           const result = this.compiler.validateSyntax(source);
           
           if (result.valid) {

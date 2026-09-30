@@ -5,6 +5,7 @@ import { ErrorReporter } from './reporter';
 import { CompilerOptions, CompileResult, CompilerError, ErrorSeverity, ASTNode } from './types';
 import * as fs from 'fs';
 import * as path from 'path';
+import { resolveSafePath } from './utils/path-guard';
 
 /**
  * Pine Script Compiler
@@ -35,7 +36,7 @@ export class PineScriptCompiler {
     
     try {
       // Read file (use synchronous read to avoid hanging with mocked async fs in tests)
-      const source = fs.readFileSync(filePath, 'utf8');
+      const source = fs.readFileSync(resolveSafePath(filePath), 'utf8');
       
       // Compile source
       const result = this.compileSource(source, filePath);
